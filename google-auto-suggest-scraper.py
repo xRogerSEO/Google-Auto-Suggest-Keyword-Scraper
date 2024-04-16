@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup4
 import pandas as pd
 from google.colab import files
 import ipywidgets as widgets
