@@ -1,16 +1,9 @@
-import requests
+import streamlit as st
 import pandas as pd
-import ipywidgets as widgets
-from IPython.display import display
+import requests
+from bs4 import BeautifulSoup
 
-def install_bs4():
-  subprocess.check_call([sys.executable, "-m", "pip", "install", "bs4"])
-
-try:
-  from bs4 import BeautifulSoup
-except:
-  install_bs4()
-  from bs4 import BeautifulSoup
+# Ensure you have BeautifulSoup installed in your environment beforehand
 
 def get_google_suggestions(query, hl='en'):
     url = f"https://www.google.com/complete/search?hl={hl}&output=toolbar&q={query}"
@@ -28,36 +21,30 @@ def get_extended_suggestions(base_query, hl='en'):
     return list(extended_suggestions)
 
 def capture_suggestions(header, query, all_suggestions):
-    print(f"\n{header}:")
+    st.write(f"\n{header}:")
     suggestions = get_extended_suggestions(query)
     all_suggestions[header] = suggestions
     for i, suggestion in enumerate(suggestions, 1):
-        print(f"{i}. {suggestion}")
+        st.write(f"{i}. {suggestion}")
 
-def download_csv(button):
-    df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in all_suggestions.items()]))
-    csv_filename = "google_suggestions.csv"
-    df.to_csv(csv_filename, index=False)
+def download_csv(all_suggestions):
+    df = pd.DataFrame({k: pd.Series(v) for k, v in all_suggestions.items()})
+    return df.to_csv().encode('utf-8')
 
-    files.download(csv_filename)
+base_query = st.text_input("Enter a search query: ")
 
-base_query = input("Enter a search query: ")
+if base_query:
+    all_suggestions = {}
+    capture_suggestions("Google Suggest completions", base_query, all_suggestions)
+    capture_suggestions("Can questions", "Can " + base_query, all_suggestions)
+    capture_suggestions("How questions", "How " + base_query, all_suggestions)
+    capture_suggestions("Where questions", "Where " + base_query, all_suggestions)
+    capture_suggestions("Versus", base_query + " versus", all_suggestions)
+    capture_suggestions("For", base_query + " for", all_suggestions)
 
-all_suggestions = {}
-
-capture_suggestions("Google Suggest completions", base_query, all_suggestions)
-
-capture_suggestions("Can questions", "Can " + base_query, all_suggestions)
-
-capture_suggestions("How questions", "How " + base_query, all_suggestions)
-
-capture_suggestions("Where questions", "Where " + base_query, all_suggestions)
-
-capture_suggestions("Versus", base_query + " versus", all_suggestions)
-
-capture_suggestions("For", base_query + " for", all_suggestions)
-
-# Create and display the download button
-download_button = widgets.Button(description="Download CSV")
-download_button.on_click(download_csv)
-display(download_button)
+    st.download_button(
+        label="Download CSV",
+        data=download_csv(all_suggestions),
+        file_name="google_suggestions.csv",
+        mime='text/csv'
+    )
