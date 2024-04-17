@@ -1,6 +1,5 @@
 import requests
 import pandas as pd
-from google.colab import files
 import ipywidgets as widgets
 from IPython.display import display
 
