@@ -1,9 +1,15 @@
 import streamlit as st
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
 
-# Ensure you have BeautifulSoup installed in your environment beforehand
+def install_bs4():
+  subprocess.check_call([sys.executable, "-m", "pip", "install", "bs4"])
+
+try:
+  from bs4 import BeautifulSoup
+except:
+  install_bs4()
+  from bs4 import BeautifulSoup
 
 def get_google_suggestions(query, hl='en'):
     url = f"https://www.google.com/complete/search?hl={hl}&output=toolbar&q={query}"
