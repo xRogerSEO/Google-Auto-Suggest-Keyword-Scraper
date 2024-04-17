@@ -5,6 +5,15 @@ from google.colab import files
 import ipywidgets as widgets
 from IPython.display import display
 
+def install_bs4():
+  subprocess.check_call([sys.executable, "-m", "pip", "install", "bs4"])
+
+try:
+  from bs4 import BeautifulSoup
+except:
+  install_bs4()
+  from bs4 import BeautifulSoup
+
 def get_google_suggestions(query, hl='en'):
     url = f"https://www.google.com/complete/search?hl={hl}&output=toolbar&q={query}"
     response = requests.get(url)
